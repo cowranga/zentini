@@ -1,4 +1,4 @@
-# 🕯️ Zentini — Video Calling
+#  Zentini: Video Calling for 2
 
 HD, low-latency 1-on-1 video calls for couples. Built with Daily.co + Node.js + React.
 
@@ -118,7 +118,7 @@ You'll be on a live HD video call. 🎉
 
 ---
 
-## Tech stack explained (plain English)
+## Tech stack explained
 
 | What | Tech | Why |
 |------|------|-----|
@@ -126,33 +126,6 @@ You'll be on a live HD video call. 🎉
 | Server | **Node.js + Express** | Lightweight, fast to write, perfect for real-time apps. |
 | Frontend | **React + Vite** | Industry standard. Fast development, great ecosystem. |
 | Routing | **React Router** | Handles the `/call/:roomName` URL automatically. |
-
----
-
-## Deploying (when you're ready)
-
-**Backend → Railway**
-1. Push your backend folder to GitHub
-2. Go to **railway.app**, connect your repo, deploy
-3. Add your `DAILY_API_KEY` and `FRONTEND_URL` as environment variables
-
-**Frontend → Vercel**
-1. Push your frontend folder to GitHub
-2. Go to **vercel.com**, connect your repo, deploy
-3. Add `VITE_API_URL` pointing to your Railway backend URL
-
-Both have free tiers. Total cost to start: **£0**.
-
----
-
-## Next features to build (in order)
-
-1. ✅ **Video calling** ← you are here
-2. 🔜 **Love notes** — simple messaging between calls
-3. 🔜 **Watch together** — YouTube sync
-4. 🔜 **Couple profiles** — shared space with anniversary, stats
-5. 🔜 **Date night reminders** — scheduled notifications
-6. 🔜 **Virtual gifts & reactions** — in-call moments
 
 ---
 
