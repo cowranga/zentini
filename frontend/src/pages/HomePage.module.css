@@ -1,0 +1,235 @@
+.page {
+  min-height: 100vh;
+  background: var(--cream);
+  position: relative;
+  overflow: hidden;
+}
+
+.orb1 {
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 168, 124, 0.2) 0%, transparent 70%);
+  top: -100px; right: -100px;
+  pointer-events: none;
+}
+
+.orb2 {
+  position: absolute;
+  width: 350px; height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 196, 184, 0.25) 0%, transparent 70%);
+  bottom: 50px; left: -80px;
+  pointer-events: none;
+}
+
+.nav {
+  padding: 24px 48px;
+  position: relative; z-index: 2;
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--brown-deep);
+}
+
+.logo span {
+  color: var(--amber-deep);
+  font-style: italic;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 24px 100px;
+  position: relative; z-index: 2;
+}
+
+.tag {
+  background: rgba(232, 168, 124, 0.15);
+  border: 1px solid rgba(232, 168, 124, 0.3);
+  padding: 6px 18px;
+  border-radius: 50px;
+  font-size: 13px;
+  color: var(--amber-deep);
+  letter-spacing: 0.06em;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 64px;
+  font-weight: 300;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--brown-deep);
+  margin-bottom: 20px;
+}
+
+.title em {
+  font-style: italic;
+  color: var(--amber-deep);
+}
+
+.subtitle {
+  font-size: 17px;
+  color: var(--text-soft);
+  font-weight: 300;
+  text-align: center;
+  max-width: 440px;
+  line-height: 1.7;
+  margin-bottom: 60px;
+}
+
+.cards {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  max-width: 780px;
+}
+
+.card {
+  flex: 1;
+  background: white;
+  border-radius: 28px;
+  padding: 40px;
+  border: 1px solid var(--cream-dark);
+  box-shadow: 0 8px 40px rgba(122, 92, 68, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardIcon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+.card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--brown-deep);
+}
+
+.card p {
+  font-size: 14px;
+  color: var(--text-soft);
+  font-weight: 300;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.btnPrimary {
+  background: var(--amber-deep);
+  color: var(--cream);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: all 0.25s;
+  box-shadow: 0 4px 20px rgba(196, 123, 74, 0.3);
+  margin-top: 8px;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: var(--brown-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(196, 123, 74, 0.35);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.linkBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linkLabel {
+  font-size: 12px !important;
+  color: var(--text-muted) !important;
+  letter-spacing: 0.04em;
+  margin-bottom: 0 !important;
+}
+
+.linkRow {
+  display: flex;
+  gap: 8px;
+}
+
+.linkInput {
+  flex: 1;
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-main);
+  font-family: inherit;
+  outline: none;
+}
+
+.copyBtn {
+  width: 42px;
+  background: var(--cream-dark);
+  border: 1px solid var(--cream-dark);
+  border-radius: 12px;
+  font-size: 16px;
+  color: var(--text-soft);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.copyBtn:hover {
+  background: var(--amber-light);
+  color: var(--brown-deep);
+}
+
+.joinForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.joinInput {
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 14px;
+  color: var(--text-main);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.joinInput:focus {
+  border-color: var(--amber);
+}
+
+.joinInput::placeholder {
+  color: var(--text-muted);
+}
+
+.error {
+  font-size: 13px !important;
+  color: #C04040 !important;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .cards { flex-direction: column; }
+  .title { font-size: 44px; }
+  .nav { padding: 20px 24px; }
+}

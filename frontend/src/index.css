@@ -1,0 +1,25 @@
+:root {
+  --amber: #E8A87C;
+  --amber-light: #F2C9A8;
+  --amber-deep: #C47B4A;
+  --blush: #E8C4B8;
+  --blush-light: #F5E6DF;
+  --cream: #FAF4ED;
+  --cream-dark: #F0E6D8;
+  --brown-soft: #7A5C44;
+  --brown-deep: #4A3528;
+  --text-main: #3D2B1F;
+  --text-soft: #8B6B57;
+  --text-muted: #B89A87;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+button { cursor: pointer; font-family: inherit; }
