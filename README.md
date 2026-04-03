@@ -26,7 +26,7 @@ zentini/
 
 ---
 
-## Step 1 — Get your Daily.co API key (free)
+## Step 1: Get your Daily.co API key (free)
 
 1. Go to **https://dashboard.daily.co** and sign up (free)
 2. In the dashboard, go to **Developers → API Key**
@@ -36,18 +36,7 @@ Daily.co free tier includes **10,000 call minutes/month** — plenty to get star
 
 ---
 
-## Step 2 — Install Node.js (if you don't have it)
-
-Download from **https://nodejs.org** → install the LTS version.
-
-To check it worked, open your terminal and run:
-```bash
-node --version   # should show v18 or higher
-```
-
----
-
-## Step 3 — Set up the backend
+## Step 2: Set up the backend
 
 ```bash
 # 1. Go into the backend folder
@@ -73,7 +62,7 @@ You should see:
 
 ---
 
-## Step 4 — Set up the frontend
+## Step 3: Set up the frontend
 
 Open a **new terminal window**, then:
 
@@ -99,7 +88,7 @@ You should see:
 
 ---
 
-## Step 5 — Test it
+## Step 4: Test it
 
 1. Open **http://localhost:5173** in your browser
 2. Click **"Create room ♡"**
@@ -114,7 +103,7 @@ You'll be on a live HD video call. 🎉
 ## How the invite link works
 
 - Person A clicks **Create room** → gets a unique link like `http://localhost:5173/call/zentini-a1b2c3d4`
-- They share it with their partner (copy/paste, text, email — anything)
+- They share it with their partner
 - Person B opens the link, enters their name, joins instantly
 - No accounts, no passwords, no app download needed
 
@@ -131,4 +120,4 @@ You'll be on a live HD video call. 🎉
 
 ---
 
-Made with ♡ for couples everywhere.
+
