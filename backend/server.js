@@ -7,8 +7,15 @@ const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 
-// Only allow requests from the frontend origin
-const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+// Allow the production frontend and any Vercel preview deployments
+const allowedOrigin = (origin, callback) => {
+  const allowed = process.env.FRONTEND_URL || 'http://localhost:5173';
+  if (!origin || origin === allowed || origin.endsWith('.vercel.app') || origin === 'http://localhost:5173') {
+    callback(null, true);
+  } else {
+    callback(new Error('Not allowed by CORS'));
+  }
+};
 app.use(cors({ origin: allowedOrigin }));
 
 // Rate limiters
