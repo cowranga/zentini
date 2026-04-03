@@ -1,6 +1,8 @@
 #  Zentini: Video Calling for 2
 
 HD, low-latency 1-on-1 video calls for couples. Built with Daily.co + Node.js + React.
+Check out the static html demo render here: https://zentini.netlify.app
+Live Demo: https://zentini.vercel.app
 
 ---
 
