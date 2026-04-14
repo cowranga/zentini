@@ -5,10 +5,9 @@ import styles from './CallPage.module.css'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
-// Call states
 const STATE = {
   LOADING: 'loading',
-  WAITING: 'waiting',      // Room validated, asking for display name
+  WAITING: 'waiting',
   JOINING: 'joining',
   IN_CALL: 'in_call',
   PARTNER_LEFT: 'partner_left',
@@ -18,15 +17,16 @@ const STATE = {
 export default function CallPage() {
   const { roomName } = useParams()
   const navigate = useNavigate()
-  const callContainerRef = useRef(null)
-  const callFrameRef = useRef(null)
+  const callObjectRef = useRef(null)
+  const localVideoRef = useRef(null)
+  const remoteVideoRef = useRef(null)
+  const remoteAudioRef = useRef(null)
 
   const [state, setState] = useState(STATE.LOADING)
   const [displayName, setDisplayName] = useState('')
   const [roomUrl, setRoomUrl] = useState('')
   const [error, setError] = useState('')
   const [duration, setDuration] = useState(0)
-  const [participants, setParticipants] = useState({})
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
   const [partnerName, setPartnerName] = useState('')
@@ -52,9 +52,7 @@ export default function CallPage() {
 
   // ── Timer ──
   function startTimer() {
-    timerRef.current = setInterval(() => {
-      setDuration(d => d + 1)
-    }, 1000)
+    timerRef.current = setInterval(() => setDuration(d => d + 1), 1000)
   }
 
   function formatDuration(secs) {
@@ -65,78 +63,78 @@ export default function CallPage() {
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
   }
 
+  // ── Attach tracks to video elements ──
+  function attachTracks(participant) {
+    if (participant.local) {
+      const track = participant.tracks?.video?.persistentTrack
+      if (localVideoRef.current && track) {
+        localVideoRef.current.srcObject = new MediaStream([track])
+      }
+    } else {
+      const videoTrack = participant.tracks?.video?.persistentTrack
+      const audioTrack = participant.tracks?.audio?.persistentTrack
+      if (remoteVideoRef.current && videoTrack) {
+        remoteVideoRef.current.srcObject = new MediaStream([videoTrack])
+      }
+      if (remoteAudioRef.current && audioTrack) {
+        remoteAudioRef.current.srcObject = new MediaStream([audioTrack])
+      }
+    }
+  }
+
   // ── Join the call ──
   const joinCall = useCallback(async () => {
     if (!displayName.trim() || !roomUrl) return
     setState(STATE.JOINING)
 
-    const frame = DailyIframe.createFrame(callContainerRef.current, {
-      iframeStyle: {
-        width: '100%',
-        height: '100%',
-        border: 'none',
-        borderRadius: '0px',
-      },
-      showLeaveButton: false,
-      showFullscreenButton: false,
-    })
+    const callObject = DailyIframe.createCallObject()
+    callObjectRef.current = callObject
 
-    callFrameRef.current = frame
-
-    // ── Event listeners ──
-    frame.on('joined-meeting', () => {
+    callObject.on('joined-meeting', (event) => {
       hasJoinedRef.current = true
       setState(STATE.IN_CALL)
       startTimer()
+      const local = event.participants?.local
+      if (local) attachTracks(local)
     })
 
-    frame.on('participant-joined', (event) => {
+    callObject.on('participant-joined', (event) => {
       if (!event.participant.local) {
         setPartnerName(event.participant.user_name || 'Your partner')
       }
-      setParticipants(prev => ({
-        ...prev,
-        [event.participant.session_id]: event.participant
-      }))
+      attachTracks(event.participant)
     })
 
-    frame.on('participant-updated', (event) => {
-      setParticipants(prev => ({
-        ...prev,
-        [event.participant.session_id]: event.participant
-      }))
+    callObject.on('participant-updated', (event) => {
+      attachTracks(event.participant)
     })
 
-    frame.on('participant-left', (event) => {
+    callObject.on('track-started', (event) => {
+      attachTracks(event.participant)
+    })
+
+    callObject.on('participant-left', (event) => {
       if (!event.participant.local) {
         setPartnerName('')
         setState(STATE.PARTNER_LEFT)
         clearInterval(timerRef.current)
+        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
+        if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null
       }
-      setParticipants(prev => {
-        const updated = { ...prev }
-        delete updated[event.participant.session_id]
-        return updated
-      })
     })
 
-    frame.on('left-meeting', () => {
+    callObject.on('left-meeting', () => {
       clearInterval(timerRef.current)
-      if (hasJoinedRef.current) {
-        navigate('/')
-      }
+      if (hasJoinedRef.current) navigate('/')
     })
 
-    frame.on('error', (e) => {
+    callObject.on('error', (e) => {
       setError(e.errorMsg || 'Call error')
       setState(STATE.ERROR)
     })
 
     try {
-      await frame.join({
-        url: roomUrl,
-        userName: displayName.trim(),
-      })
+      await callObject.join({ url: roomUrl, userName: displayName.trim() })
     } catch (e) {
       console.error('join error full:', e)
       setError(e.message || e.errorMsg || JSON.stringify(e) || 'Unknown join error')
@@ -146,18 +144,18 @@ export default function CallPage() {
 
   // ── Controls ──
   function toggleMute() {
-    callFrameRef.current?.setLocalAudio(isMuted)
+    callObjectRef.current?.setLocalAudio(isMuted)
     setIsMuted(!isMuted)
   }
 
   function toggleVideo() {
-    callFrameRef.current?.setLocalVideo(isVideoOff)
+    callObjectRef.current?.setLocalVideo(isVideoOff)
     setIsVideoOff(!isVideoOff)
   }
 
   async function leaveCall() {
     clearInterval(timerRef.current)
-    await callFrameRef.current?.leave()
+    await callObjectRef.current?.leave()
     navigate('/')
   }
 
@@ -165,11 +163,9 @@ export default function CallPage() {
   useEffect(() => {
     return () => {
       clearInterval(timerRef.current)
-      callFrameRef.current?.destroy()
+      callObjectRef.current?.destroy()
     }
   }, [])
-
-  const participantCount = Object.keys(participants).length
 
   // ───────────────── RENDER ─────────────────
 
@@ -197,9 +193,10 @@ export default function CallPage() {
     )
   }
 
+  const inCall = state === STATE.IN_CALL || state === STATE.PARTNER_LEFT
+
   return (
     <div className={styles.page}>
-      {/* Background glow */}
       <div className={styles.bgGlow} />
 
       {/* ── Name entry overlay ── */}
@@ -230,6 +227,27 @@ export default function CallPage() {
         </div>
       )}
 
+      {/* ── Video area ── */}
+      <div className={styles.videoArea} style={{ display: inCall || state === STATE.JOINING ? 'block' : 'none' }}>
+        {/* Remote (full screen) */}
+        <video
+          ref={remoteVideoRef}
+          className={styles.remoteVideo}
+          autoPlay
+          playsInline
+        />
+        {/* Hidden audio element for remote participant */}
+        <audio ref={remoteAudioRef} autoPlay />
+        {/* Local (picture-in-picture) */}
+        <video
+          ref={localVideoRef}
+          className={styles.localVideo}
+          autoPlay
+          playsInline
+          muted
+        />
+      </div>
+
       {/* ── Partner left banner ── */}
       {state === STATE.PARTNER_LEFT && (
         <div className={styles.partnerLeftBanner}>
@@ -239,17 +257,16 @@ export default function CallPage() {
       )}
 
       {/* ── TOP BAR ── */}
-      {(state === STATE.IN_CALL || state === STATE.PARTNER_LEFT) && (
+      {inCall && (
         <div className={styles.topBar}>
           <div className={styles.logo}>zen<span>tini</span></div>
           <div className={styles.callInfo}>
-            {partnerName && (
+            {partnerName ? (
               <div className={styles.partnerTag}>
                 <div className={styles.onlineDot} />
                 {partnerName}
               </div>
-            )}
-            {participantCount < 2 && !partnerName && (
+            ) : (
               <div className={styles.waitingTag}>
                 ⏳ Waiting for your partner...
               </div>
@@ -259,15 +276,8 @@ export default function CallPage() {
         </div>
       )}
 
-      {/* ── DAILY IFRAME CONTAINER ── */}
-      <div
-        ref={callContainerRef}
-        className={styles.callContainer}
-        style={{ visibility: state === STATE.JOINING || state === STATE.IN_CALL || state === STATE.PARTNER_LEFT ? 'visible' : 'hidden' }}
-      />
-
       {/* ── CONTROLS ── */}
-      {(state === STATE.IN_CALL || state === STATE.PARTNER_LEFT) && (
+      {inCall && (
         <div className={styles.controls}>
           <div className={styles.controlsInner}>
             <button
