@@ -318,18 +318,16 @@ export default function CallPage() {
           muted
         />
         {/* Remote camera PiP during screen share — draggable */}
-        {remoteScreenSharing && (
-          <video
-            ref={remoteCameraRef}
-            className={styles.remoteCameraVideo}
-            style={{ left: remoteCamPos.x, top: remoteCamPos.y }}
-            autoPlay
-            playsInline
-            onPointerDown={onRemoteCamPointerDown}
-            onPointerMove={onRemoteCamPointerMove}
-            onPointerUp={onRemoteCamPointerUp}
-          />
-        )}
+        <video
+          ref={remoteCameraRef}
+          className={styles.remoteCameraVideo}
+          style={{ left: remoteCamPos.x, top: remoteCamPos.y, display: remoteScreenSharing ? 'block' : 'none' }}
+          autoPlay
+          playsInline
+          onPointerDown={onRemoteCamPointerDown}
+          onPointerMove={onRemoteCamPointerMove}
+          onPointerUp={onRemoteCamPointerUp}
+        />
       </div>
 
       {/* ── Remote screen share badge ── */}
