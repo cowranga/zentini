@@ -29,6 +29,8 @@ export default function CallPage() {
   const [duration, setDuration] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
+  const [isScreenSharing, setIsScreenSharing] = useState(false)
+  const [remoteScreenSharing, setRemoteScreenSharing] = useState(false)
   const [partnerName, setPartnerName] = useState('')
   const timerRef = useRef(null)
   const hasJoinedRef = useRef(false)
@@ -71,10 +73,19 @@ export default function CallPage() {
         localVideoRef.current.srcObject = new MediaStream([track])
       }
     } else {
+      const screenTrack = participant.tracks?.screenVideo?.persistentTrack
+      const screenState = participant.tracks?.screenVideo?.state
       const videoTrack = participant.tracks?.video?.persistentTrack
       const audioTrack = participant.tracks?.audio?.persistentTrack
-      if (remoteVideoRef.current && videoTrack) {
-        remoteVideoRef.current.srcObject = new MediaStream([videoTrack])
+
+      if (remoteVideoRef.current) {
+        if (screenTrack && screenState === 'playable') {
+          remoteVideoRef.current.srcObject = new MediaStream([screenTrack])
+          setRemoteScreenSharing(true)
+        } else if (videoTrack) {
+          remoteVideoRef.current.srcObject = new MediaStream([videoTrack])
+          setRemoteScreenSharing(false)
+        }
       }
       if (remoteAudioRef.current && audioTrack) {
         remoteAudioRef.current.srcObject = new MediaStream([audioTrack])
@@ -107,6 +118,10 @@ export default function CallPage() {
 
     callObject.on('participant-updated', (event) => {
       attachTracks(event.participant)
+      if (event.participant.local) {
+        const screenState = event.participant.tracks?.screenVideo?.state
+        setIsScreenSharing(screenState === 'playable' || screenState === 'loading')
+      }
     })
 
     callObject.on('track-started', (event) => {
@@ -151,6 +166,18 @@ export default function CallPage() {
   function toggleVideo() {
     callObjectRef.current?.setLocalVideo(isVideoOff)
     setIsVideoOff(!isVideoOff)
+  }
+
+  async function toggleScreenShare() {
+    if (isScreenSharing) {
+      callObjectRef.current?.stopScreenShare()
+    } else {
+      try {
+        await callObjectRef.current?.startScreenShare()
+      } catch {
+        // User cancelled the screen picker or permission denied
+      }
+    }
   }
 
   async function leaveCall() {
@@ -248,6 +275,13 @@ export default function CallPage() {
         />
       </div>
 
+      {/* ── Remote screen share badge ── */}
+      {remoteScreenSharing && inCall && (
+        <div className={styles.screenShareBadge}>
+          🖥️ {partnerName || 'Your partner'} is sharing their screen
+        </div>
+      )}
+
       {/* ── Partner left banner ── */}
       {state === STATE.PARTNER_LEFT && (
         <div className={styles.partnerLeftBanner}>
@@ -296,6 +330,15 @@ export default function CallPage() {
             >
               {isVideoOff ? '📵' : '📷'}
               <span>{isVideoOff ? 'Start video' : 'Stop video'}</span>
+            </button>
+
+            <button
+              className={`${styles.ctrlBtn} ${isScreenSharing ? styles.ctrlBtnOn : ''}`}
+              onClick={toggleScreenShare}
+              title={isScreenSharing ? 'Stop sharing' : 'Share screen'}
+            >
+              {isScreenSharing ? '📤' : '🖥️'}
+              <span>{isScreenSharing ? 'Stop sharing' : 'Share screen'}</span>
             </button>
 
             <button
