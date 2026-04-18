@@ -25,6 +25,10 @@ export default function CallPage() {
   const remoteCameraRef = useRef(null)
   const remoteCamDragging = useRef(false)
   const remoteCamDragOffset = useRef({ x: 0, y: 0 })
+  const localCamDragging = useRef(false)
+  const localCamDragOffset = useRef({ x: 0, y: 0 })
+  const resizing = useRef(false)
+  const resizeStart = useRef({ x: 0, y: 0, width: 0, height: 0 })
 
   const [state, setState] = useState(STATE.LOADING)
   const [displayName, setDisplayName] = useState('')
@@ -36,6 +40,8 @@ export default function CallPage() {
   const [isScreenSharing, setIsScreenSharing] = useState(false)
   const [remoteScreenSharing, setRemoteScreenSharing] = useState(false)
   const [remoteCamPos, setRemoteCamPos] = useState(() => ({ x: 24, y: window.innerHeight - 250 }))
+  const [remoteCamSize, setRemoteCamSize] = useState({ width: 200, height: 130 })
+  const [localCamPos, setLocalCamPos] = useState(() => ({ x: window.innerWidth - 224, y: window.innerHeight - 250 }))
   const [partnerName, setPartnerName] = useState('')
   const timerRef = useRef(null)
   const hasJoinedRef = useRef(false)
@@ -200,20 +206,46 @@ export default function CallPage() {
     }
   }
 
+  function onLocalCamPointerDown(e) {
+    localCamDragging.current = true
+    localCamDragOffset.current = { x: e.clientX - localCamPos.x, y: e.clientY - localCamPos.y }
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+  function onLocalCamPointerMove(e) {
+    if (!localCamDragging.current) return
+    setLocalCamPos({ x: e.clientX - localCamDragOffset.current.x, y: e.clientY - localCamDragOffset.current.y })
+  }
+  function onLocalCamPointerUp() { localCamDragging.current = false }
+
   function onRemoteCamPointerDown(e) {
     remoteCamDragging.current = true
     remoteCamDragOffset.current = { x: e.clientX - remoteCamPos.x, y: e.clientY - remoteCamPos.y }
     e.currentTarget.setPointerCapture(e.pointerId)
   }
-
   function onRemoteCamPointerMove(e) {
     if (!remoteCamDragging.current) return
     setRemoteCamPos({ x: e.clientX - remoteCamDragOffset.current.x, y: e.clientY - remoteCamDragOffset.current.y })
   }
+  function onRemoteCamPointerUp() { remoteCamDragging.current = false }
 
-  function onRemoteCamPointerUp() {
-    remoteCamDragging.current = false
+  function onResizePointerDown(e) {
+    e.stopPropagation()
+    resizing.current = true
+    resizeStart.current = { x: e.clientX, y: e.clientY, width: remoteCamSize.width, height: remoteCamSize.height }
+    e.currentTarget.setPointerCapture(e.pointerId)
   }
+  function onResizePointerMove(e) {
+    if (!resizing.current) return
+    const dx = e.clientX - resizeStart.current.x
+    const dy = e.clientY - resizeStart.current.y
+    const maxW = Math.floor(window.innerWidth * 0.5)
+    const maxH = Math.floor(window.innerHeight * 0.5)
+    setRemoteCamSize({
+      width: Math.min(maxW, Math.max(200, resizeStart.current.width + dx)),
+      height: Math.min(maxH, Math.max(130, resizeStart.current.height + dy)),
+    })
+  }
+  function onResizePointerUp() { resizing.current = false }
 
   async function leaveCall() {
     clearInterval(timerRef.current)
@@ -309,25 +341,40 @@ export default function CallPage() {
         {/* Hidden audio elements for remote participant */}
         <audio ref={remoteAudioRef} autoPlay />
         <audio ref={screenAudioRef} autoPlay />
-        {/* Local (picture-in-picture) */}
+        {/* Local (picture-in-picture) — draggable */}
         <video
           ref={localVideoRef}
           className={styles.localVideo}
+          style={{ left: localCamPos.x, top: localCamPos.y }}
           autoPlay
           playsInline
           muted
+          onPointerDown={onLocalCamPointerDown}
+          onPointerMove={onLocalCamPointerMove}
+          onPointerUp={onLocalCamPointerUp}
         />
-        {/* Remote camera PiP during screen share — draggable */}
-        <video
-          ref={remoteCameraRef}
-          className={styles.remoteCameraVideo}
-          style={{ left: remoteCamPos.x, top: remoteCamPos.y, display: remoteScreenSharing ? 'block' : 'none' }}
-          autoPlay
-          playsInline
+        {/* Remote camera PiP during screen share — draggable + resizable */}
+        <div
+          className={styles.remoteCameraWrapper}
+          style={{
+            left: remoteCamPos.x,
+            top: remoteCamPos.y,
+            width: remoteCamSize.width,
+            height: remoteCamSize.height,
+            display: remoteScreenSharing ? 'block' : 'none',
+          }}
           onPointerDown={onRemoteCamPointerDown}
           onPointerMove={onRemoteCamPointerMove}
           onPointerUp={onRemoteCamPointerUp}
-        />
+        >
+          <video ref={remoteCameraRef} className={styles.remoteCameraVideo} autoPlay playsInline />
+          <div
+            className={styles.resizeHandle}
+            onPointerDown={onResizePointerDown}
+            onPointerMove={onResizePointerMove}
+            onPointerUp={onResizePointerUp}
+          />
+        </div>
       </div>
 
       {/* ── Remote screen share badge ── */}
