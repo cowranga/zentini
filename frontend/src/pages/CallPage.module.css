@@ -188,6 +188,24 @@
   background: #0a0604;
 }
 
+.remoteCameraVideo {
+  position: absolute;
+  width: 200px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(232, 168, 124, 0.25);
+  z-index: 16;
+  background: #0d0804;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.remoteCameraVideo:active {
+  cursor: grabbing;
+}
+
 .localVideo {
   position: absolute;
   bottom: 120px;
