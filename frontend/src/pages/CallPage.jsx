@@ -21,6 +21,7 @@ export default function CallPage() {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const remoteAudioRef = useRef(null)
+  const screenAudioRef = useRef(null)
 
   const [state, setState] = useState(STATE.LOADING)
   const [displayName, setDisplayName] = useState('')
@@ -89,6 +90,15 @@ export default function CallPage() {
       }
       if (remoteAudioRef.current && audioTrack) {
         remoteAudioRef.current.srcObject = new MediaStream([audioTrack])
+      }
+      const screenAudioTrack = participant.tracks?.screenAudio?.persistentTrack
+      const screenAudioState = participant.tracks?.screenAudio?.state
+      if (screenAudioRef.current) {
+        if (screenAudioTrack && screenAudioState === 'playable') {
+          screenAudioRef.current.srcObject = new MediaStream([screenAudioTrack])
+        } else {
+          screenAudioRef.current.srcObject = null
+        }
       }
     }
   }
@@ -173,7 +183,7 @@ export default function CallPage() {
       callObjectRef.current?.stopScreenShare()
     } else {
       try {
-        await callObjectRef.current?.startScreenShare()
+        await callObjectRef.current?.startScreenShare({ screenAudioEnabled: true })
       } catch {
         // User cancelled the screen picker or permission denied
       }
@@ -185,6 +195,14 @@ export default function CallPage() {
     await callObjectRef.current?.leave()
     navigate('/')
   }
+
+  // Auto-dismiss "partner left" banner after 5s
+  useEffect(() => {
+    if (state === STATE.PARTNER_LEFT) {
+      const t = setTimeout(() => setState(STATE.IN_CALL), 5000)
+      return () => clearTimeout(t)
+    }
+  }, [state])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -259,12 +277,13 @@ export default function CallPage() {
         {/* Remote (full screen) */}
         <video
           ref={remoteVideoRef}
-          className={styles.remoteVideo}
+          className={`${styles.remoteVideo} ${remoteScreenSharing ? styles.remoteVideoContain : ''}`}
           autoPlay
           playsInline
         />
-        {/* Hidden audio element for remote participant */}
+        {/* Hidden audio elements for remote participant */}
         <audio ref={remoteAudioRef} autoPlay />
+        <audio ref={screenAudioRef} autoPlay />
         {/* Local (picture-in-picture) */}
         <video
           ref={localVideoRef}

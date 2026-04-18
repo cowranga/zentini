@@ -183,6 +183,11 @@
   object-fit: cover;
 }
 
+.remoteVideoContain {
+  object-fit: contain;
+  background: #0a0604;
+}
+
 .localVideo {
   position: absolute;
   bottom: 120px;
@@ -194,6 +199,7 @@
   border: 1px solid rgba(232, 168, 124, 0.25);
   z-index: 15;
   background: #0d0804;
+  transform: scaleX(-1);
 }
 
 /* ── CONTROLS ── */
@@ -314,6 +320,13 @@
   gap: 16px;
   color: rgba(250, 244, 237, 0.8);
   font-size: 14px;
+  animation: bannerFadeOut 5s ease-in forwards;
+}
+
+@keyframes bannerFadeOut {
+  0%   { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .partnerLeftBanner button {
