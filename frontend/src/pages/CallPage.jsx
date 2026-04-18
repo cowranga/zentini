@@ -228,22 +228,42 @@ export default function CallPage() {
   }
   function onRemoteCamPointerUp() { remoteCamDragging.current = false }
 
-  function onResizePointerDown(e) {
-    e.stopPropagation()
-    resizing.current = true
-    resizeStart.current = { x: e.clientX, y: e.clientY, width: remoteCamSize.width, height: remoteCamSize.height }
-    e.currentTarget.setPointerCapture(e.pointerId)
+  function onResizePointerDown(corner) {
+    return (e) => {
+      e.stopPropagation()
+      resizing.current = true
+      resizeStart.current = {
+        x: e.clientX, y: e.clientY,
+        width: remoteCamSize.width, height: remoteCamSize.height,
+        posX: remoteCamPos.x, posY: remoteCamPos.y,
+        corner,
+      }
+      e.currentTarget.setPointerCapture(e.pointerId)
+    }
   }
   function onResizePointerMove(e) {
     if (!resizing.current) return
-    const dx = e.clientX - resizeStart.current.x
-    const dy = e.clientY - resizeStart.current.y
+    const { x, y, width, height, posX, posY, corner } = resizeStart.current
+    const dx = e.clientX - x
+    const dy = e.clientY - y
     const maxW = Math.floor(window.innerWidth * 0.5)
     const maxH = Math.floor(window.innerHeight * 0.5)
-    setRemoteCamSize({
-      width: Math.min(maxW, Math.max(200, resizeStart.current.width + dx)),
-      height: Math.min(maxH, Math.max(130, resizeStart.current.height + dy)),
-    })
+    const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
+    // Right edge and bottom edge stay fixed for left/top corners respectively
+    const rightEdge = posX + width
+    const bottomEdge = posY + height
+    let newW, newH, newX = posX, newY = posY
+    if (corner === 'br') {
+      newW = clamp(width + dx, 200, maxW); newH = clamp(height + dy, 130, maxH)
+    } else if (corner === 'bl') {
+      newW = clamp(width - dx, 200, maxW); newH = clamp(height + dy, 130, maxH); newX = rightEdge - newW
+    } else if (corner === 'tr') {
+      newW = clamp(width + dx, 200, maxW); newH = clamp(height - dy, 130, maxH); newY = bottomEdge - newH
+    } else {
+      newW = clamp(width - dx, 200, maxW); newH = clamp(height - dy, 130, maxH); newX = rightEdge - newW; newY = bottomEdge - newH
+    }
+    setRemoteCamSize({ width: newW, height: newH })
+    setRemoteCamPos({ x: newX, y: newY })
   }
   function onResizePointerUp() { resizing.current = false }
 
@@ -368,12 +388,15 @@ export default function CallPage() {
           onPointerUp={onRemoteCamPointerUp}
         >
           <video ref={remoteCameraRef} className={styles.remoteCameraVideo} autoPlay playsInline />
-          <div
-            className={styles.resizeHandle}
-            onPointerDown={onResizePointerDown}
-            onPointerMove={onResizePointerMove}
-            onPointerUp={onResizePointerUp}
-          />
+          {['tl', 'tr', 'bl', 'br'].map(corner => (
+            <div
+              key={corner}
+              className={`${styles.resizeHandle} ${styles['resizeHandle' + corner.toUpperCase()]}`}
+              onPointerDown={onResizePointerDown(corner)}
+              onPointerMove={onResizePointerMove}
+              onPointerUp={onResizePointerUp}
+            />
+          ))}
         </div>
       </div>
 

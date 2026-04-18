@@ -6,6 +6,8 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .bgGlow {
@@ -213,25 +215,34 @@
 
 .resizeHandle {
   position: absolute;
-  bottom: 0;
-  right: 0;
   width: 24px;
   height: 24px;
-  cursor: nwse-resize;
   touch-action: none;
+  z-index: 1;
 }
 
 .resizeHandle::after {
   content: '';
   position: absolute;
-  bottom: 5px;
-  right: 5px;
   width: 9px;
   height: 9px;
-  border-right: 2px solid rgba(232, 168, 124, 0.55);
-  border-bottom: 2px solid rgba(232, 168, 124, 0.55);
+  border-color: rgba(232, 168, 124, 0.55);
+  border-style: solid;
+  border-width: 0;
   border-radius: 1px;
 }
+
+.resizeHandleBR { bottom: 0; right: 0; cursor: nwse-resize; }
+.resizeHandleBR::after { bottom: 5px; right: 5px; border-right-width: 2px; border-bottom-width: 2px; }
+
+.resizeHandleBL { bottom: 0; left: 0; cursor: nesw-resize; }
+.resizeHandleBL::after { bottom: 5px; left: 5px; border-left-width: 2px; border-bottom-width: 2px; }
+
+.resizeHandleTR { top: 0; right: 0; cursor: nesw-resize; }
+.resizeHandleTR::after { top: 5px; right: 5px; border-right-width: 2px; border-top-width: 2px; }
+
+.resizeHandleTL { top: 0; left: 0; cursor: nwse-resize; }
+.resizeHandleTL::after { top: 5px; left: 5px; border-left-width: 2px; border-top-width: 2px; }
 
 .localVideo {
   position: absolute;
