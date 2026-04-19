@@ -86,7 +86,7 @@ export default function HomePage() {
                 onClick={handleCreate}
                 disabled={loading}
               >
-                {loading ? 'Creating your space...' : 'Create room ♡'}
+                {loading ? 'Creating your space...' : 'Create room'}
               </button>
             ) : (
               <div className={styles.linkBox}>
