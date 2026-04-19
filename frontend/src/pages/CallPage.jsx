@@ -43,6 +43,7 @@ export default function CallPage() {
   const [remoteCamSize, setRemoteCamSize] = useState({ width: 200, height: 130 })
   const [localCamPos, setLocalCamPos] = useState(() => ({ x: window.innerWidth - 224, y: window.innerHeight - 250 }))
   const [partnerName, setPartnerName] = useState('')
+  const [controlsVisible, setControlsVisible] = useState(false)
   const timerRef = useRef(null)
   const hasJoinedRef = useRef(false)
 
@@ -317,8 +318,12 @@ export default function CallPage() {
 
   const inCall = state === STATE.IN_CALL || state === STATE.PARTNER_LEFT
 
+  function onPageMouseMove(e) {
+    setControlsVisible(e.clientY > window.innerHeight - 120)
+  }
+
   return (
-    <div className={styles.page}>
+    <div className={styles.page} onMouseMove={onPageMouseMove}>
       <div className={styles.bgGlow} />
 
       {/* ── Name entry overlay ── */}
@@ -437,7 +442,7 @@ export default function CallPage() {
 
       {/* ── CONTROLS ── */}
       {inCall && (
-        <div className={styles.controls}>
+        <div className={`${styles.controls} ${controlsVisible ? styles.controlsVisible : ''}`}>
           <div className={styles.controlsInner}>
             <button
               className={`${styles.ctrlBtn} ${isMuted ? styles.ctrlBtnOff : ''}`}
