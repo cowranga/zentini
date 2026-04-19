@@ -70,7 +70,7 @@ export default function HomePage() {
         <div className={styles.tag}>♡ For couples, by heart</div>
         <h1 className={styles.title}>Your space<br />to <em>be close</em></h1>
         <p className={styles.subtitle}>
-          HD video calls designed for two. Create a room and share the link — no account needed.
+          HD video calls designed for two. Create a room and share the link. No account needed!
         </p>
 
         <div className={styles.cards}>
