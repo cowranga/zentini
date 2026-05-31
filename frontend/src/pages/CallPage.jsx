@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import DailyIframe from '@daily-co/daily-js'
 import styles from './CallPage.module.css'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = import.meta.env.VITE_API_URL || ''
 
 const STATE = {
   LOADING: 'loading',
